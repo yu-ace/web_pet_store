@@ -10,5 +10,5 @@ public interface IPetService {
     double[] ave();
     Pet[] max();
     Pet[] min();
-    void petStatus(int petId,int status);
+    void changePetStatus(int petId,int status);
 }

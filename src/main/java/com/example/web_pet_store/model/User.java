@@ -1,6 +1,6 @@
 package com.example.web_pet_store.model;
 
-public class Order {
+public class User {
     private int id;
     private String name;
     private int petId;

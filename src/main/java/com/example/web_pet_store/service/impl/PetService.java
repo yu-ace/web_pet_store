@@ -95,7 +95,7 @@ public class PetService implements IPetService {
     }
 
     @Override
-    public void petStatus(int petId, int status) {
+    public void changePetStatus(int petId, int status) {
         for(Pet pet : petList){
             if(pet.getId() == petId){
                 pet.setStatus(status);

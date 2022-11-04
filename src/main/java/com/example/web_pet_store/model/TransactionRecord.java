@@ -4,7 +4,7 @@ public class TransactionRecord {
     private int id;
     private int petId;
     private double amount;
-
+    private int orderId;
     public int getId() {
         return id;
     }
@@ -27,5 +27,13 @@ public class TransactionRecord {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public int getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
     }
 }

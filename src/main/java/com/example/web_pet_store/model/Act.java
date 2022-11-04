@@ -4,7 +4,7 @@ public class Act {
     private int id;
     private String name;
     private int petType;
-    private int rebate;
+    private double rebate;
     /**
      * 0开启
      * 1关闭
@@ -35,11 +35,11 @@ public class Act {
         this.petType = petType;
     }
 
-    public int getRebate() {
+    public double getRebate() {
         return rebate;
     }
 
-    public void setRebate(int rebate) {
+    public void setRebate(double rebate) {
         this.rebate = rebate;
     }
 
