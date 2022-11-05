@@ -30,11 +30,12 @@ public class ClientTCPReceiver implements Runnable{
                         int userId = message1.getUserId();
                         ClientHandler.userId = userId;
                         break;
-                    case "QUIT":
-                        System.exit(0);
-                        break;
                     case "BYE":
                         System.out.println("服务器已关闭连接，再见");
+                        System.exit(0);
+                        break;
+                    case "BREAK":
+                        System.out.println("已成功退出管理系统");
                         System.exit(0);
                         break;
                 }

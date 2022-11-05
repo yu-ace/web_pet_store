@@ -77,7 +77,7 @@ public class PetService implements IPetService {
     public Pet[] min() {
         Pet[] pets = new Pet[2];
         for(Pet pet:petList){
-            if(pet.getPrice() == 0){
+            if(pet.getType() == 0){
                 if(pets[0] == null){
                     pets[0] = pet;
                 }else if(pets[0].getPrice() > pet.getPrice()){

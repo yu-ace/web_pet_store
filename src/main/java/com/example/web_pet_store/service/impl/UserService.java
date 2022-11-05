@@ -34,6 +34,7 @@ public class UserService implements IUserService {
         double amount = 0;
         for(Pet pet:petList){
             if(pet.getId() == petId && pet.getStatus() == 0){
+                amount = pet.getPrice();
                 for(Act act:actList){
                     if(act.getPetType() == pet.getType() && act.getStatus() == 0){
                         amount = pet.getPrice() * act.getRebate();
@@ -45,6 +46,8 @@ public class UserService implements IUserService {
         }
         return amount;
     }
+
+
 
     @Override
     public List<User> getUserList() {

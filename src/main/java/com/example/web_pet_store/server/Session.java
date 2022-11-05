@@ -17,7 +17,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.security.PublicKey;
 import java.util.List;
 
 public class Session implements Runnable , Closeable {
@@ -58,21 +57,21 @@ public class Session implements Runnable , Closeable {
     @Override
     public void close() throws IOException {
         System.out.println("用户退出，关闭线程，释放资源");
-        //todo;关闭渠道
+        WebPetStoreApplication.sessionManager.removeSession(this);
         thread.interrupt();
         socket.close();
     }
 
     @Override
     public void run() {
-        while(true){
+        while(isRunning){
             try {
                 byte[] buffer = new byte[1024];
                 InputStream in = socket.getInputStream();
                 in.read(buffer);
                 String message = new String(buffer);
                 message = message.trim();
-                System.out.printf("接收到消息：%s",message);
+                System.out.printf("接收到消息：%s \n",message);
                 Message message1 = JSON.parseObject(message.trim(), Message.class);
                 handleCommand(message1);
             } catch (IOException e) {
@@ -114,14 +113,19 @@ public class Session implements Runnable , Closeable {
                 for(Act act:actList){
                     String line1 = String.format("%d %s %d %.2f %d",act.getId(),
                             act.getName(),act.getPetType(),act.getRebate(),act.getStatus());
-                    ls1 = ls1 + line1;
+                    ls1 = ls1 + line1 + "\n";
                 }
                 sendSystemMessage(ls1);
                 break;
             case "BUY_PET":
-                userService.newUser(message.getUserId(),message.getNickName(),message.getPetId());
-                sendSystemMessage("请支付：" + userService.amount(message.getPetId()) + "元");
-                petService.changePetStatus(message.getPetId(),1);
+                List<Pet> petList1 = petService.getPetList();
+                for(Pet pet:petList1){
+                    if(pet.getId() == message.getPetId() && pet.getStatus() == 0){
+                        userService.newUser(message.getUserId(),message.getNickName(),message.getPetId());
+                        sendSystemMessage("请支付：" + userService.amount(message.getPetId()) + "元");
+                        petService.changePetStatus(message.getPetId(),1);
+                    }
+                }
                 break;
             case "NEW_PET":
                 petService.newPet(message.getPetId(),message.getPetName(),message.getPetType(),
@@ -143,7 +147,7 @@ public class Session implements Runnable , Closeable {
                 for(User user2:userList){
                     String line2 = String.format("%d %s %d %.2f",user2.getId(),
                             user2.getName(),user2.getPetId(),user2.getAmount());
-                    ls2 = ls2 + line2;
+                    ls2 = ls2 + line2 + "\n";
                 }
                 sendSystemMessage(ls2);
                 break;
@@ -156,7 +160,7 @@ public class Session implements Runnable , Closeable {
                         a = "狗";
                     }
                     String line3 = String.format("宠物%s的平均价格为%.2f",a,ave[i]);
-                    ls3 = ls3 + line3;
+                    ls3 = ls3 + line3 + "\n";
                 }
                 sendSystemMessage(ls3);
                 break;
@@ -168,40 +172,43 @@ public class Session implements Runnable , Closeable {
                     if(i == 1){
                         a = "狗";
                     }
-                    String line4 = String.format("宠物%s的最高价为：.2f",a,pets[i]);
-                    ls4 = ls4 + line4;
+                    String line4 = String.format("宠物%s的最高价为：%.2f",a,pets[i].getPrice());
+                    ls4 = ls4 + line4 + "\n";
                 }
                 sendSystemMessage(ls4);
                 break;
             case "PET_MIN":
-                Pet[] pets1 = petService.min();
+                Pet[] petsM = petService.min();
                 String ls5 = "";
                 for(int i = 0;i < 2;i++){
                     String a1 = "猫";
                     if(i == 1){
                         a1 = "狗";
                     }
-                    String line5 = String.format("宠物%s的最低价格为：.2f",a1,pets1[i]);
-                    ls5 = ls5 + line5;
+                    String line5 = String.format("宠物%s的最低价格为：%.2f",a1,petsM[i].getPrice());
+                    ls5 = ls5 + line5 + "\n";
                 }
                 sendSystemMessage(ls5);
                 break;
-            case "QUIT":
-                Message message2 = new Message();
-                message2.setCommand("QUIT");
-                try {
-                    socket.getOutputStream().write(JSON.toJSONString(message2).getBytes());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                break;
             case "LOGOUT":
+                isRunning = false;
                 System.out.printf("用户%s退出",message.getNickName());
                 Message message3 = new Message();
                 message3.setCommand("BYE");
                 try {
                     socket.getOutputStream().write(JSON.toJSONString(message3).getBytes());
                     this.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                break;
+            case "QUIT":
+                isRunning = false;
+                System.out.printf("用户%s退出",message.getNickName());
+                Message message4 = new Message();
+                message4.setCommand("BREAK");
+                try {
+                    socket.getOutputStream().write(JSON.toJSONString(message4).getBytes());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
